@@ -1,0 +1,206 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{ntheorem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{multicol}
+\usepackage[landscape, a4paper, hmargin={2cm, 2cm}, vmargin={0.1cm, 2cm}]{geometry}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows}
+\usetikzlibrary{shapes.geometric}
+
+\usepackage{lipsum}% just to generate some text
+
+
+\title{Exemple de réduction de SAT vers 3 Coloriage}
+\date{}
+\author{Valeran MAYTIE}
+
+\begin{document}
+  \maketitle
+
+  \begin{center}
+    \begin{tikzpicture}
+      \node[ellipse, fill=green] (C) at (15,0) 
+        {$\neg V_1 \vee \neg V_2 \neg V_3 \vee \neg V_4 \vee V_6$};
+
+      \node [circle, minimum size =0.5cm, fill=red] (G4-1) at (14, -1) { };
+      \node [circle, minimum size =0.5cm, fill=black] (G4-2) at (16, -1) { };
+      \draw (C) -- (G4-1) -- (G4-2) -- (C);
+
+      \foreach \s\cv\cf in 
+        {1/green/red, 2/red/green,3/red/green,4/green/red,5/red/green,6/red/green} {
+          \node [circle, minimum size =0.5cm, fill=\cv] (V\s-V) at (\s*4, -6) { };
+        \node [circle, minimum size =0.5cm, fill=\cf] (V\s-F) at (\s*4+2, -6) { };
+        \node [] at (\s*4, -6.5) {$V_\s$};
+        \node [] at (\s*4+2, -6.5) {$\neg V_\s$};
+        \draw (V\s-F) -- (V\s-V);
+      };
+
+      \coordinate[shift={(0,1)}] (n) at (V1-F);
+      \node [circle, minimum size =0.5cm, fill=black] (G1-1) at (n) { };
+      \coordinate[shift={(0,1)}] (n) at (V2-F);
+      \node [circle, minimum size =0.5cm, fill=red] (G1-2) at (n) { };
+      \coordinate[shift={(2,1)}] (n) at (G1-1);
+      \node [circle, minimum size =0.5cm, fill=green] (G1-3) at (n) { };
+      \draw (G1-1) -- (G1-2) -- (G1-3) -- (G1-1) -- (V1-F);
+      \draw (G1-2) -- (V2-F);
+
+      \coordinate[shift={(0,1)}] (n) at (G1-3);
+      \node [circle, minimum size =0.5cm, fill=black] (G2-1) at (n) { };
+      \coordinate[shift={(0,3)}] (n) at (V3-F);
+      \node [circle, minimum size =0.5cm, fill=red] (G2-2) at (n) { };
+      \coordinate[shift={(3,1)}] (n) at (G2-1);
+      \node [circle, minimum size =0.5cm, fill=green] (G2-3) at (n) { };
+      \draw (G2-1) -- (G2-2) -- (G2-3) -- (G2-1) -- (G1-3);
+      \draw (G2-2) -- (V3-F);
+
+      \coordinate[shift={(0,1)}] (n) at (V4-F);
+      \node [circle, minimum size =0.5cm, fill=black] (G3-1) at (n) { };
+      \coordinate[shift={(0,1)}] (n) at (V6-V);
+      \node [circle, minimum size =0.5cm, fill=green] (G3-2) at (n) { };
+      \coordinate[shift={(3,1)}] (n) at (G3-1);
+      \node [circle, minimum size =0.5cm, fill=red] (G3-3) at (n) { };
+      \draw (G3-1) -- (G3-2) -- (G3-3) -- (G3-1) -- (V4-F);
+      \draw (G3-2) -- (V6-V);
+
+      \draw (G2-3) -- (G4-1);
+      \draw (G3-3) -- (G4-2);
+
+      \draw(4,-1.9)node[circle, minimum size=0.5cm, fill=green](G) {}
+            --++(0:2)node[circle, minimum size=0.5cm, fill=black](B) {}
+            --++(120:2)node[circle, minimum size=0.5cm, fill=red](R) {}
+            --cycle;
+
+      \draw (R) -- (C.west);
+      \draw (B) -- (C.west);
+      \draw (B) -- (G1-3);
+      \draw (B) -- (G2-3);
+      \draw (B) to[bend right=10] (G3-3);
+
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{multicols}{5}
+
+    Ce petit graphe est utilisé pour imposer des contraintes de couleurs. :
+
+    \noindent\begin{minipage}{\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \node[circle, fill=green] (G1) at (0, 0) {};
+      \node[circle, fill=black] (G2) at (0:1) {};
+      \node[circle, fill=red] (G3) at (60:1) {};
+      \draw (G1) -- (G2) -- (G3) -- (G1);
+    \end{tikzpicture}
+    \end{minipage}
+
+    Pour éviter qu'un n\oe ud ne soit colorié en noir,
+    il suffit de le relier au n\oe ud correspondant à la couleur 
+    noire dans le graphe présenté ci-dessus.
+
+    Nous allons commencer en choisissant trois couleurs :
+    \begin{itemize}
+      \item Vert : N\oe ud est vrai
+      \item Rouge : No\oe ud est faux
+      \item Noir : ne représente rien.
+    \end{itemize}
+
+    \columnbreak
+
+    Nous représentons les variables et leur négation 
+    par de simple N\oe uds. Nous relions chaque 
+    variable à sa négation afin de garantir qu'elles 
+    soient coloriées avec deux couleurs différentes.
+    On relie ces n\oe uds au nœud noir afin d'empêcher 
+    qu'ils soient coloriés en noir.
+
+    "Une clause est représentée par un simple n\oe ud. 
+    Pour la forcer à être verte, on la relie aux nœuds rouge et noir.
+
+    Si une variable est coloriée en vert, elle est vraie. 
+    Sinon, si sa négation est coloriée en vert, elle est fausse.
+    \columnbreak
+
+
+    Pour faire cette réduction on utilise ce ``gadget'' :
+
+  \noindent\begin{minipage}{\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \node[circle, draw] (G1) at (0, 0) {};
+      \node[circle, draw] (G2) at (1, 0) {};
+      \node[circle, draw] (G3) at (2, 0.5) {};
+      \node[circle, draw] (G4) at (1, 1) {};
+      \node[circle, draw] (G5) at (0, 1) {};
+      \draw (G1) -- (G2) -- (G3) -- (G4) -- (G5);
+      \draw (G2) -- (G4);
+    \end{tikzpicture}
+    \end{minipage}
+    Il va nous servir de porte logique ``ou''.
+
+    On force le sommet à être rouge ou vert en le reliant au sommet noir.
+
+    Si le sommet est vert alors il y forcément 
+    un des ``pieds'' qui est vert aussi.
+
+    On peut alors construire le graphe en utilisant 
+    des ``gadgets'' pour chaque clause. Ces ``gadgets'' 
+    permettent de relier tous les ``pieds'' des clauses aux 
+    variables ou à leurs négations correspondantes.
+
+    \noindent\begin{minipage}{\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \node at (-0.4, 0.5) {$\beta$};
+      \node[circle, fill=red] (G1) at (0, 0) {};
+      \node[circle, fill=green] (G2) at (1, 0) {};
+      \node[circle, fill=red] (G3) at (2, 0.5) {};
+      \node[circle, fill=black] (G4) at (1, 1) {};
+      \node[circle, fill=green] (G5) at (0, 1) {};
+      \draw (G1) -- (G2) -- (G3) -- (G4) -- (G5);
+      \draw (G2) -- (G4);
+
+      \node at (-0.4, 2) {$\alpha_3$};
+      \node[circle, fill=red] (G1) at (0, 1.5) {};
+      \node[circle, fill=black] (G2) at (1, 1.5) {};
+      \node[circle, fill=red] (G3) at (2, 2) {};
+      \node[circle, fill=green] (G4) at (1, 2.5) {};
+      \node[circle, fill=red] (G5) at (0, 2.5) {};
+      \draw (G1) -- (G2) -- (G3) -- (G4) -- (G5);
+      \draw (G2) -- (G4);
+
+      \node at (-0.4, 3.5) {$\alpha_2$};
+      \node[circle, fill=red] (G1) at (0, 3) {};
+      \node[circle, fill=black] (G2) at (1, 3) {};
+      \node[circle, fill=green] (G3) at (2, 3.5) {};
+      \node[circle, fill=red] (G4) at (1, 4) {};
+      \node[circle, fill=green] (G5) at (0, 4) {};
+      \draw (G1) -- (G2) -- (G3) -- (G4) -- (G5);
+      \draw (G2) -- (G4);
+
+      \node at (-0.4, 5) {$\alpha_1$};
+      \node[circle, fill=green] (G1) at (0, 4.5) {};
+      \node[circle, fill=black] (G2) at (1, 4.5) {};
+      \node[circle, fill=green] (G3) at (2, 5) {};
+      \node[circle, fill=red] (G4) at (1, 5.5) {};
+      \node[circle, fill=green] (G5) at (0, 5.5) {};
+      \draw (G1) -- (G2) -- (G3) -- (G4) -- (G5);
+      \draw (G2) -- (G4);
+    \end{tikzpicture}
+    \end{minipage}
+
+    Si le graphe est coloriable, alors les n\oe uds 
+    des clauses doivent être coloriés en vert, ce qui 
+    signifie que les gadgets doivent avoir au moins un 
+    pied vert. Dans la branche verte, le coloriage utilisera 
+    les configurations $\alpha_{1,2}$, car le sommet est forcément 
+    vert. Par conséquent, la configuration $\beta$ ne pose pas de 
+    problème pour la réduction.
+  \end{multicols}
+\end{document}
